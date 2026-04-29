@@ -1,0 +1,4 @@
+interface:
+  display_name: "Christies Auctions Summary"
+  short_description: "Login-enhanced Christie’s Jewellery results summaries via CDP"
+  default_prompt: "Use $christies-auctions-summary to summarize Christie’s Jewellery auction results for a date range from my logged-in CDP Chrome session and write report.md, all-lots.csv, and raw-data.json."
