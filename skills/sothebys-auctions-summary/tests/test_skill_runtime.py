@@ -8,6 +8,7 @@ SKILL_DIR = Path(__file__).resolve().parents[1]
 FETCH_PATH = SKILL_DIR / 'scripts' / 'fetch_sothebys_auctions.py'
 RUN_PATH = SKILL_DIR / 'scripts' / 'run_sothebys_summary.py'
 ANALYZE_PATH = SKILL_DIR / 'scripts' / 'analyze_sothebys_auctions.py'
+LOGIN_PATH = SKILL_DIR / 'scripts' / 'verify_sothebys_login.py'
 
 
 def load_module(path: Path, name: str):
@@ -23,6 +24,7 @@ class SkillRuntimeTests(unittest.TestCase):
         cls.fetch = load_module(FETCH_PATH, 'fetch_mod')
         cls.runmod = load_module(RUN_PATH, 'run_mod')
         cls.analyze = load_module(ANALYZE_PATH, 'analyze_mod')
+        cls.loginmod = load_module(LOGIN_PATH, 'login_mod')
 
     def test_remote_cdp_does_not_require_local_profile(self):
         cfg = {
@@ -115,6 +117,14 @@ class SkillRuntimeTests(unittest.TestCase):
             self.assertIn('| Lot | Creator | Low | High | Realized | Currency | Status | Link | Title |', text)
             self.assertIn('[原始链接](https://example/1)', text)
             self.assertIn('240', text)
+
+
+    def test_login_classifier_requires_positive_logged_in_signal(self):
+        classify = self.loginmod.classify_login_state
+        self.assertTrue(classify('link "LOG OUT"', 'LOG OUT MY ACCOUNT')[0])
+        self.assertFalse(classify('link "LOG IN"', 'LOG IN PREFERRED ACCESS')[0])
+        self.assertFalse(classify('', 'PREFERRED ACCESS')[0])
+        self.assertFalse(classify('', '')[0])
 
     def test_skill_md_has_no_absolute_validator_path(self):
         skill_md = (SKILL_DIR / 'SKILL.md').read_text(encoding='utf-8')
