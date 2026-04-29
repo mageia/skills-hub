@@ -114,9 +114,9 @@ class SkillRuntimeTests(unittest.TestCase):
             summary = self.analyze.build_summary(data)
             text = self.analyze.render_report(data, summary)
             self.assertIn('## All lots', text)
-            self.assertIn('| Lot | Creator | Low | High | Realized | Currency | Status | Link | Title |', text)
-            self.assertIn('[原始链接](https://example/1)', text)
-            self.assertIn('240', text)
+            self.assertIn('| Lot | Creator | Title | Estimate | Realized | Variance% | Status | Link |', text)
+            self.assertIn('[查看](https://example/1)', text)
+            self.assertIn('240 HKD', text)
 
 
     def test_login_classifier_requires_positive_logged_in_signal(self):
@@ -125,6 +125,51 @@ class SkillRuntimeTests(unittest.TestCase):
         self.assertFalse(classify('link "LOG IN"', 'LOG IN PREFERRED ACCESS')[0])
         self.assertFalse(classify('', 'PREFERRED ACCESS')[0])
         self.assertFalse(classify('', '')[0])
+
+    def test_report_layout_includes_realized_and_compact_links(self):
+        data = {
+            'query': {'date_from': '2026-04-20', 'date_to': '2026-04-29', 'category': 'Jewelry'},
+            'auctions': [
+                {'auction_id': 'a1', 'title': 'High Jewelry', 'location': 'Hong Kong', 'sales_type': 'Live', 'end_at': '2026-04-23', 'sale_total': 256867760, 'sale_total_currency': 'HKD', 'url': 'https://example-auction/1'}
+            ],
+            'lots': [
+                {'auction_id': 'a1', 'lot_id': 'lot-1', 'lot_number': '1601', 'title': 'Lot One', 'creator': 'Cartier', 'estimate_low': 100, 'estimate_high': 200, 'currency': 'HKD', 'final_price': 240, 'result_visibility': 'visible', 'sold_state': 'sold', 'withdrawn': False, 'url': 'https://example/1'},
+                {'auction_id': 'a1', 'lot_id': 'lot-2', 'lot_number': '1602', 'title': 'Lot Two', 'creator': 'Graff', 'estimate_low': 300, 'estimate_high': 500, 'currency': 'HKD', 'final_price': None, 'result_visibility': 'hidden', 'sold_state': 'hidden', 'withdrawn': False, 'url': 'https://example/2'},
+            ],
+            'summary': {},
+            'errors': [],
+        }
+        summary = self.analyze.build_summary(data)
+        text = self.analyze.render_report(data, summary)
+        self.assertIn('## 拍卖列表', text)
+        self.assertIn('256,867,760 HKD', text)
+        self.assertIn('## All lots', text)
+        self.assertIn('| Lot | Creator | Title | Estimate | Realized | Variance% | Status | Link |', text)
+        self.assertIn('[查看](https://example/1)', text)
+        self.assertIn('240 HKD', text)
+
+    def test_main_writes_all_lots_csv(self):
+        data = {
+            'query': {'date_from': '2026-04-20', 'date_to': '2026-04-29', 'category': 'Jewelry'},
+            'auctions': [
+                {'auction_id': 'a1', 'title': 'High Jewelry', 'location': 'Hong Kong', 'sales_type': 'Live', 'end_at': '2026-04-23', 'sale_total': 256867760, 'sale_total_currency': 'HKD', 'url': 'https://example-auction/1'}
+            ],
+            'lots': [
+                {'auction_id': 'a1', 'lot_id': 'lot-1', 'lot_number': '1601', 'title': 'Lot One', 'creator': 'Cartier', 'estimate_low': 100, 'estimate_high': 200, 'currency': 'HKD', 'final_price': 240, 'result_visibility': 'visible', 'sold_state': 'sold', 'withdrawn': False, 'url': 'https://example/1'}
+            ],
+            'summary': {},
+            'errors': [],
+        }
+        with tempfile.TemporaryDirectory() as td:
+            raw = Path(td) / 'raw.json'
+            report = Path(td) / 'report.md'
+            raw.write_text(json.dumps(data), encoding='utf-8')
+            import subprocess
+            result = subprocess.run(['python3', str(ANALYZE_PATH), '--input', str(raw), '--output', str(report), '--write-summary'], text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True)
+            csv_path = Path(td) / 'all-lots.csv'
+            self.assertTrue(csv_path.exists())
+            csv_text = csv_path.read_text(encoding='utf-8')
+            self.assertIn('auction_title,auction_date,auction_location,lot_number,creator,title,estimate_low,estimate_high,currency,final_price,variance_pct,sold_state,reserve_met,number_of_bids,category_match_method,url', csv_text)
 
     def test_skill_md_has_no_absolute_validator_path(self):
         skill_md = (SKILL_DIR / 'SKILL.md').read_text(encoding='utf-8')

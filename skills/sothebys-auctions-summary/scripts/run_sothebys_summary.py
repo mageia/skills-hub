@@ -175,7 +175,8 @@ def main() -> None:
         "--output", str(raw_path),
     ])
     run([sys.executable, str(script_dir() / "analyze_sothebys_auctions.py"), "--input", str(raw_path), "--output", str(report_path), "--write-summary"])
-    print(json.dumps({"raw_data": str(raw_path), "report": str(report_path)}, ensure_ascii=False))
+    csv_path = report_path.with_name('all-lots.csv')
+    print(json.dumps({"raw_data": str(raw_path), "report": str(report_path), "csv": str(csv_path)}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

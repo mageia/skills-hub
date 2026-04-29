@@ -264,6 +264,14 @@ def extract_lots_from_apollo(apollo: dict[str, Any], category: str) -> list[dict
     return rows
 
 
+
+
+def parse_auction_title(card_text: str) -> str:
+    title = re.sub(r'^Type: auction\s+CATEGORY:\s+', '', card_text, flags=re.IGNORECASE).strip()
+    title = re.sub(r'^(PAST AUCTION|AUCTION CLOSING|CLOSING|SELLING EXHIBITION)\s+', '', title, flags=re.IGNORECASE).strip()
+    title = re.sub(r'\s+(?:(?:\d{1,2}[–-])?\d{1,2}\s+[A-Z]+\s+20\d{2}).*$', '', title, flags=re.IGNORECASE).strip()
+    return title or card_text
+
 def normalize_location(card_text: str) -> str | None:
     if '|' not in card_text:
         return None
@@ -304,7 +312,7 @@ def main() -> None:
         sale_total, sale_total_currency = extract_sale_total(card['text'])
         auction = {
             'auction_id': card['href'].rstrip('/').split('/')[-1],
-            'title': re.sub(r'^Type: auction\s+', '', card['text']),
+            'title': parse_auction_title(card['text']),
             'url': card['href'],
             'category': args.category,
             'location': normalize_location(card['text']),
