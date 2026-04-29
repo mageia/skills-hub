@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sothebys Auctions Summary"
+  short_description: "Login-enhanced Sotheby’s auction summaries via CDP"
+  default_prompt: "Use $sothebys-auctions-summary to summarize last week’s Jewelry auction results from my logged-in Sotheby’s CDP Chrome session."
