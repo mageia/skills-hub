@@ -35,6 +35,16 @@ class SkillRuntimeTests(unittest.TestCase):
         self.assertEqual(norm['cdp']['url'], 'https://cdp.example.test')
         self.assertEqual(norm['category'], 'Jewelry')
 
+    def test_local_chrome_command_is_preserved(self):
+        cfg = {
+            'date_range': {'from': '2026-04-20', 'to': '2026-04-29'},
+            'category': 'Jewelry',
+            'cdp': {'chrome_command': 'google-chrome', 'auto_launch': True, 'user_data_dir': '~/.chrome-debug-profile'},
+            'output': {'dir': './tmp-out', 'format': ['markdown', 'json']},
+        }
+        norm = self.runmod.normalize_config(cfg)
+        self.assertEqual(norm['cdp']['chrome_command'], 'google-chrome')
+
     def test_extract_lots_from_apollo_cache(self):
         apollo = {
             'LotCard:1': {

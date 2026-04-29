@@ -115,7 +115,7 @@ def normalize_config(config: dict[str, Any]) -> dict[str, Any]:
             "host": cdp.get("host", "127.0.0.1"),
             "port": int(cdp.get("port", 9222)),
             "url": cdp.get("url"),
-            "chrome_path": cdp.get("chrome_path"),
+            "chrome_command": cdp.get("chrome_command") or cdp.get("chrome_path"),
             "user_data_dir": str(profile_dir),
             "profile_directory": cdp.get("profile_directory", "Default"),
             "auto_launch": bool(cdp.get("auto_launch", True)),
@@ -136,7 +136,7 @@ def ensure_cdp(config: dict[str, Any]) -> None:
     env = os.environ.copy()
     env.update({
         "CDP_PORT": str(cdp["port"]),
-        "CHROME_PATH": cdp["chrome_path"],
+        "CHROME_COMMAND": cdp.get("chrome_command") or "",
         "USER_DATA_DIR": cdp["user_data_dir"],
         "PROFILE_DIRECTORY": cdp["profile_directory"],
     })
