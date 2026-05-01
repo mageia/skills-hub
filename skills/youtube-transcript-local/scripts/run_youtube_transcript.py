@@ -8,7 +8,7 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import parse_qs, urlparse
@@ -44,7 +44,7 @@ class Logger:
         self.path = path
 
     def log(self, message: str) -> None:
-        timestamp = datetime.now(UTC).isoformat()
+        timestamp = datetime.now(timezone.utc).isoformat()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open('a', encoding='utf-8') as handle:
             handle.write(f'[{timestamp}] {message}\n')
@@ -217,6 +217,7 @@ def download_audio_source(url: str, destination: Path, logger: Logger) -> Path:
         '-x',
         '--audio-format', 'wav',
         '--no-playlist',
+        '--extractor-args', 'youtube:player_client=android',
         '-o', str(destination),
         url,
     ]

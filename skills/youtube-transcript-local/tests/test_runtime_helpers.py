@@ -52,6 +52,30 @@ class RuntimeHelperTests(unittest.TestCase):
         text = self.mod.srt_to_text('1\n00:00:00,000 --> 00:00:01,000\nHello world\n\n2\n00:00:01,000 --> 00:00:02,000\nSecond line\n')
         self.assertEqual(text, 'Hello world\nSecond line')
 
+
+    def test_logger_uses_timezone_utc_import_for_broader_python_compatibility(self):
+        source = RUN_PATH.read_text(encoding='utf-8')
+        self.assertIn('from datetime import datetime, timezone', source)
+        self.assertNotIn('from datetime import UTC, datetime', source)
+        self.assertIn('datetime.now(timezone.utc).isoformat()', source)
+
+    def test_download_audio_source_uses_android_player_client(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            audio_path = Path(tmp) / 'source.wav'
+            logger = self.mod.Logger(Path(tmp) / 'process.log')
+
+            def fake_run_command(command, logger_arg, capture_output=False):
+                self.assertIn('--extractor-args', command)
+                index = command.index('--extractor-args')
+                self.assertEqual(command[index + 1], 'youtube:player_client=android')
+                audio_path.write_text('audio', encoding='utf-8')
+                return mock.Mock(returncode=0, stdout='', stderr='')
+
+            with mock.patch.object(self.mod, 'run_command', side_effect=fake_run_command):
+                result = self.mod.download_audio_source('https://www.youtube.com/watch?v=abc123XYZ89', audio_path, logger)
+
+            self.assertEqual(result, audio_path)
+
     def test_prepare_output_dir_requires_force_to_overwrite(self):
         with tempfile.TemporaryDirectory() as tmp:
             output_root = Path(tmp)
