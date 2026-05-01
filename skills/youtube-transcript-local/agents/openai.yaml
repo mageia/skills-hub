@@ -1,0 +1,4 @@
+interface:
+  display_name: "YouTube Transcript Local"
+  short_description: "Extract YouTube subtitles first, then local ASR fallback"
+  default_prompt: "Use $youtube-transcript-local to extract transcript.txt and transcript.srt from a YouTube URL with existing subtitles first and local ASR fallback."
