@@ -35,3 +35,26 @@ python3 scripts/poll_task.py --task-id <task_id>
 ## Provider returns an unsupported response shape
 
 Inspect the JSON response saved in `metadata.json` when available, then patch the result extraction logic in `scripts/waninter_utils.py`.
+
+
+## Unauthorized / HTTP 401
+
+This means Waninter Creative rejected the configured API Key for protected endpoints.
+
+Fix:
+
+1. Open the Waninter Creative `/api` page.
+2. Create or copy a valid API Key. It usually starts with `sk_live_`.
+3. Re-run:
+
+```bash
+python3 scripts/configure_api_key.py
+```
+
+The configuration script validates the key after saving.
+
+You can also validate later with:
+
+```bash
+python3 scripts/validate_api_key.py
+```

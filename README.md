@@ -64,9 +64,9 @@ Run:
 python3 ~/.codex/skills/waninter-creative/scripts/configure_api_key.py
 ```
 
-Ask the user to paste their Waninter Creative API Key when prompted.
+Ask the user to paste their Waninter Creative API Key when prompted. The key should be created/copied from the Waninter Creative `/api` page and usually starts with `sk_live_`.
 
-The setup asks only for the API Key. API endpoints and model defaults are already preconfigured:
+The setup asks only for the API Key, then validates it against a protected endpoint. API endpoints and model defaults are already preconfigured:
 
 - Base URL: `https://creative-studio.waninter.com`
 - Models: `GET /v1/models`
@@ -99,6 +99,12 @@ After setup, test image generation:
 python3 ~/.codex/skills/waninter-creative/scripts/generate_image.py \
   --prompt "A cinematic sci-fi city poster at sunset" \
   --aspect-ratio 16:9
+```
+
+Validate API Key:
+
+```bash
+python3 ~/.codex/skills/waninter-creative/scripts/validate_api_key.py
 ```
 
 List available models:

@@ -21,10 +21,11 @@ If missing, ask the user to get an API Key from Waninter Creative, then run:
 python3 scripts/configure_api_key.py
 ```
 
-The setup script asks only for the API Key. Do not ask beginner users to choose endpoints, model IDs, or task paths.
+The setup script asks only for the API Key, then validates it against a protected endpoint. Do not ask beginner users to choose endpoints, model IDs, or task paths. If validation returns 401/UNAUTHORIZED, tell the user to create or copy a valid API Key from the Waninter Creative /api page, usually starting with sk_live_.
 
 ## Task routing
 
+- Validate configured API Key: `scripts/validate_api_key.py`
 - List available models: `scripts/list_models.py` or `scripts/list_models.py --type image|video`
 - Text-to-image: `scripts/generate_image.py --prompt "..."`
 - Image-to-image or image editing: `scripts/edit_image.py --input image.png --prompt "..."`
