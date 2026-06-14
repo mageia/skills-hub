@@ -66,16 +66,17 @@ python3 ~/.codex/skills/waninter-creative/scripts/configure_api_key.py
 
 Ask the user to paste their Waninter Creative API Key when prompted.
 
-For most users, leave the following prompts unchanged by pressing Enter:
+The setup asks only for the API Key. API endpoints and model defaults are already preconfigured:
 
-```text
-Base URL [https://creative-studio.waninter.com]:
-Default image model [wan-image]:
-Default video model [wan-video]:
-Image generation path [/v1/images/generations]:
-Image edit path [/v1/images/edits]:
-Video generation path [/v1/videos/generations]:
-Task status path [/v1/tasks/{task_id}]:
+- Base URL: `https://creative-studio.waninter.com`
+- Models: `GET /v1/models`
+- Create task: `POST /v1/generation-tasks`
+- Poll task: `GET /v1/generation-tasks/{task_id}`
+
+The skill can also discover available models automatically:
+
+```bash
+python3 ~/.codex/skills/waninter-creative/scripts/list_models.py
 ```
 
 The config file is saved at:
@@ -98,6 +99,12 @@ After setup, test image generation:
 python3 ~/.codex/skills/waninter-creative/scripts/generate_image.py \
   --prompt "A cinematic sci-fi city poster at sunset" \
   --aspect-ratio 16:9
+```
+
+List available models:
+
+```bash
+python3 ~/.codex/skills/waninter-creative/scripts/list_models.py
 ```
 
 Test video generation:

@@ -9,52 +9,37 @@ from pathlib import Path
 CONFIG_DIR = Path.home() / ".config" / "waninter-creative"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 
-
-def ask(prompt: str, default: str) -> str:
-    value = input(f"{prompt} [{default}]: ").strip()
-    return value or default
+DEFAULT_CONFIG = {
+    "base_url": "https://creative-studio.waninter.com",
+    "auth_header": "Authorization",
+    "auth_scheme": "Bearer",
+    "models_path": "/v1/models",
+    "generation_tasks_path": "/v1/generation-tasks",
+    "generation_task_path": "/v1/generation-tasks/{task_id}",
+    "default_image_model": "nano-banana-3-1",
+    "fallback_image_model": "gpt-image-2",
+    "default_video_model": "sd2-720p",
+    "fallback_video_model": "doubao-seedance-2-0-fast-260128",
+    "request_timeout_seconds": 120,
+    "poll_interval_seconds": 5,
+    "poll_timeout_seconds": 1800,
+}
 
 
 def main() -> None:
     print("Waninter Creative API configuration")
     print(f"Config file: {CONFIG_FILE}")
+    print("Only your API Key is required. Models and API endpoints are preconfigured and can be auto-discovered later.")
     api_key = getpass.getpass("Enter your Waninter Creative API Key: ").strip()
     if not api_key:
         raise SystemExit("API key is required.")
 
-    base_url = ask("Base URL", "https://creative-studio.waninter.com")
-    default_image_model = ask("Default image model", "wan-image")
-    default_video_model = ask("Default video model", "wan-video")
-    image_generation_path = ask("Image generation path", "/v1/images/generations")
-    image_edit_path = ask("Image edit path", "/v1/images/edits")
-    video_generation_path = ask("Video generation path", "/v1/videos/generations")
-    task_status_path = ask("Task status path", "/v1/tasks/{task_id}")
-
-    config = {
-        "api_key": api_key,
-        "base_url": base_url,
-        "auth_header": "Authorization",
-        "auth_scheme": "Bearer",
-        "default_image_model": default_image_model,
-        "default_video_model": default_video_model,
-        "image_generation_path": image_generation_path,
-        "image_edit_path": image_edit_path,
-        "video_generation_path": video_generation_path,
-        "task_status_path": task_status_path,
-        "request_timeout_seconds": 120,
-        "poll_interval_seconds": 5,
-        "poll_timeout_seconds": 1800,
-        "image_response_format": "b64_json",
-        "default_image_size": "1024x1024",
-        "default_video_duration": 5,
-        "default_video_aspect_ratio": "16:9"
-    }
-
+    config = {"api_key": api_key, **DEFAULT_CONFIG}
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     CONFIG_FILE.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
     os.chmod(CONFIG_FILE, 0o600)
     print(f"Config saved to: {CONFIG_FILE}")
-    print("API key stored locally with file mode 600.")
+    print("Done. You can now generate images and videos with Waninter Creative.")
 
 
 if __name__ == "__main__":
