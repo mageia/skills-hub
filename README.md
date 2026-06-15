@@ -38,7 +38,22 @@ The Agent should then follow the installation instructions below.
 
 ## Agent installation instructions
 
-Install the skill into the user's Codex skills directory.
+Install one or more selected skills into the user's Codex skills directory.
+
+Available skill directories in this repository include:
+
+```text
+skills/waninter-creative
+skills/christies-auctions-summary
+skills/sothebys-auctions-summary
+skills/youtube-transcript-local
+```
+
+To list available skills from a local clone, run:
+
+```bash
+find skills -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort
+```
 
 ### 1. Clone the repository
 
@@ -48,7 +63,9 @@ git clone https://github.com/mageia/skills-hub.git /tmp/skills-hub
 
 If the repository already exists locally, pull the latest version instead.
 
-### 2. Copy the skill
+### 2. Copy selected skill(s)
+
+Install a single skill by copying only that skill directory. For example, to install only `waninter-creative`:
 
 ```bash
 mkdir -p ~/.codex/skills
@@ -56,9 +73,42 @@ rm -rf ~/.codex/skills/waninter-creative
 cp -R /tmp/skills-hub/skills/waninter-creative ~/.codex/skills/waninter-creative
 ```
 
-### 3. Initialize API Key config
+Install multiple selected skills by listing them in `SKILLS`:
 
-Run:
+```bash
+SKILLS=(
+  waninter-creative
+  youtube-transcript-local
+)
+
+mkdir -p ~/.codex/skills
+
+for skill in "${SKILLS[@]}"; do
+  if [ ! -d "/tmp/skills-hub/skills/$skill" ]; then
+    echo "Skill not found: $skill" >&2
+    exit 1
+  fi
+
+  rm -rf "$HOME/.codex/skills/$skill"
+  cp -R "/tmp/skills-hub/skills/$skill" "$HOME/.codex/skills/$skill"
+done
+```
+
+If you intentionally want to install all skills, use:
+
+```bash
+mkdir -p ~/.codex/skills
+for skill_dir in /tmp/skills-hub/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  skill="$(basename "$skill_dir")"
+  rm -rf "$HOME/.codex/skills/$skill"
+  cp -R "$skill_dir" "$HOME/.codex/skills/$skill"
+done
+```
+
+### 3. Initialize API Key config for Waninter Creative
+
+This step is required only when `waninter-creative` is one of the installed skills. Run:
 
 ```bash
 python3 ~/.codex/skills/waninter-creative/scripts/configure_api_key.py
@@ -132,20 +182,53 @@ Generated outputs are saved under:
 
 ## One-command install for Agents
 
-Agents may use this command when appropriate:
+Agents may use this Bash command when appropriate. Edit the `SKILLS=(...)` list to install exactly one or more selected skills.
 
 ```bash
 set -euo pipefail
+
+SKILLS=(
+  waninter-creative
+)
+
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
+
 git clone https://github.com/mageia/skills-hub.git "$TMP_DIR/skills-hub"
 mkdir -p "$HOME/.codex/skills"
-rm -rf "$HOME/.codex/skills/waninter-creative"
-cp -R "$TMP_DIR/skills-hub/skills/waninter-creative" "$HOME/.codex/skills/waninter-creative"
-python3 "$HOME/.codex/skills/waninter-creative/scripts/configure_api_key.py"
+
+for skill in "${SKILLS[@]}"; do
+  if [ ! -d "$TMP_DIR/skills-hub/skills/$skill" ]; then
+    echo "Skill not found: $skill" >&2
+    echo "Available skills:" >&2
+    find "$TMP_DIR/skills-hub/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort >&2
+    exit 1
+  fi
+
+  rm -rf "$HOME/.codex/skills/$skill"
+  cp -R "$TMP_DIR/skills-hub/skills/$skill" "$HOME/.codex/skills/$skill"
+done
+
+# Optional: initialize Waninter Creative API Key config if that skill was installed.
+if printf '%s\n' "${SKILLS[@]}" | grep -qx 'waninter-creative'; then
+  python3 "$HOME/.codex/skills/waninter-creative/scripts/configure_api_key.py"
+fi
 ```
 
-This command installs the skill and starts interactive API Key configuration.
+For example, to install two skills, change the list to:
+
+```bash
+SKILLS=(
+  waninter-creative
+  youtube-transcript-local
+)
+```
+
+To install all skills intentionally, replace the `SKILLS=(...)` block with this block after the `git clone` line:
+
+```bash
+mapfile -t SKILLS < <(find "$TMP_DIR/skills-hub/skills" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
+```
 
 ---
 
