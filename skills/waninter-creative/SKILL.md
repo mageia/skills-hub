@@ -30,7 +30,8 @@ The setup script asks only for the API Key, then validates it against a protecte
 - Text-to-image: `scripts/generate_image.py --prompt "..."`
 - Image-to-image or image editing: `scripts/edit_image.py --input image.png --prompt "..."`
 - Text-to-video: `scripts/generate_video.py --prompt "..."`
-- Image-to-video: `scripts/generate_video.py --image image.png --prompt "..."`
+- Image-to-video local file: `scripts/generate_video.py --image image.png --prompt "..."`
+- Image-to-video/reference URLs: `scripts/generate_video.py --model veo-omni-flash --reference-image-url "https://.../1.jpg" --reference-image-url "https://.../2.jpg" --prompt "..."`
 - Existing task status: `scripts/poll_task.py --task-id <id>`
 
 Scripts save outputs under:
@@ -64,6 +65,7 @@ Common arguments:
 
 - Image: `--aspect-ratio 16:9`, `--size 1024x1024`, `--quality medium`
 - Video: `--duration 5`, `--aspect-ratio 16:9`, `--resolution 720p`
+- Public image URL guidance: `--image-url <url>` for a primary image, or `--reference-image-url <url>` repeated/CSV for multiple reference images. The script sends these as `reference_asset_urls` to Waninter Creative.
 - Model override for advanced users: `--model <model-id>`
 
 Read `references/output-formats.md` for parameter mapping.
@@ -97,4 +99,10 @@ python3 scripts/generate_video.py --prompt "A golden retriever running through a
 
 ```bash
 python3 scripts/generate_video.py --image ./input.png --prompt "Animate this image with a slow cinematic push-in" --duration 5
+```
+
+```bash
+python3 scripts/generate_video.py --model veo-omni-flash --prompt "10-second ecommerce product video" --duration 10 --aspect-ratio 16:9 \
+  --reference-image-url "https://example.com/ref1.jpg" \
+  --reference-image-url "https://example.com/ref2.jpg"
 ```
